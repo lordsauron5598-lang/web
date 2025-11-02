@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Máy tính SL & Lot Size Forex</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.15);
+      width: 420px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #0077ff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #005fcc;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f8ff;
+      border: 1px solid #0077ff;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Máy tính Lot & SL Forex</h2>
+
+    <label>Chọn loại cặp:</label>
+    <select id="pairType">
+      <option value="2">USDJPY (2 số thập phân, 1 pip = 0.01)</option>
+      <option value="4">AUDUSD, EURUSD (4 số thập phân, 1 pip = 0.0001)</option>
+      <option value="xau">XAUUSD (Vàng, 1 pip = 0.01, 1 lot = 100 oz)</option>
+    </select>
+
+    <label>Vị thế:</label>
+    <select id="position">
+      <option value="long">Long (Mua)</option>
+      <option value="short">Short (Bán)</option>
+    </select>
+
+    <label>Vốn (USD):</label>
+    <input type="number" value="5000" id="capital"  placeholder="VD: 5000">
+
+    <label>Rủi ro (%):</label>
+    <input type="number" id="risk" placeholder="VD: 2">
+
+    <label>Giá vào lệnh (Entry):</label>
+    <input type="number" id="entry" placeholder="VD: 1900.00" step="0.01">
+
+    <label>ATR (pip):</label>
+    <input type="number" id="atr" placeholder="VD: 50">
+
+    <label>Hệ số ATR (1 - 2):</label>
+    <input type="number" id="atrFactor" value="1.5" step="0.1">
+
+    <button onclick="calculate()">Tính toán</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculate() {
+      let pairType = document.getElementById("pairType").value;
+      let position = document.getElementById("position").value;
+      let capital = parseFloat(document.getElementById("capital").value);
+      let riskPercent = parseFloat(document.getElementById("risk").value);
+      let entry = parseFloat(document.getElementById("entry").value);
+      let atr = parseFloat(document.getElementById("atr").value);
+      let atrFactor = parseFloat(document.getElementById("atrFactor").value);
+
+      if (isNaN(capital) || isNaN(riskPercent) || isNaN(entry) || isNaN(atr) || isNaN(atrFactor)) {
+        document.getElementById("result").innerHTML = "⚠️ Vui lòng nhập đầy đủ số liệu!";
+        return;
+      }
+
+      // Stop loss (pip)
+      let slPip = atr * atrFactor;
+
+      // Rủi ro (USD)
+      let riskUSD = capital * (riskPercent / 100);
+
+      let pipValue1Lot, stopLoss;
+
+      if (pairType === "2") {
+        // USDJPY
+        pipValue1Lot = (0.01 / entry) * 100000;
+        stopLoss = position === "long" 
+          ? (entry - slPip * 0.01).toFixed(2) 
+          : (entry + slPip * 0.01).toFixed(2);
+      } 
+      else if (pairType === "4") {
+        // EURUSD, AUDUSD
+        pipValue1Lot = (0.0001 / entry) * 100000;
+        stopLoss = position === "long" 
+          ? (entry - slPip * 0.0001).toFixed(4) 
+          : (entry + slPip * 0.0001).toFixed(4);
+      } 
+      else if (pairType === "xau") {
+        // XAUUSD
+        pipValue1Lot = 1; // 1 pip = 1 USD cho 1 lot
+        stopLoss = position === "long" 
+          ? (entry - slPip * 0.01).toFixed(2) 
+          : (entry + slPip * 0.01).toFixed(2);
+      }
+
+      // Tổng lỗ nếu SL với 1 lot
+      let loss1Lot = slPip * pipValue1Lot;
+
+      // Lot size cần vào
+      let lotSize = riskUSD / loss1Lot;
+
+      document.getElementById("result").innerHTML = `
+        📊 <b>Kết quả:</b><br>
+        • Vị thế: <b>${position.toUpperCase()}</b><br>
+        • Stop Loss: <b>${stopLoss}</b><br>
+        • SL = ${slPip.toFixed(1)} pip<br>
+        • Lot size = <b>${lotSize.toFixed(2)} lot</b><br>
+        • Rủi ro = ${riskUSD.toFixed(2)} USD
+      `;
+    }
+  </script>
+</body>
+</html>
