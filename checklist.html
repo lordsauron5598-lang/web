@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Pro - Quản lý công việc</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --gray-light: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Task Input Card */
+        .input-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .input-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .card-title i {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .card-title h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+            color: var(--dark);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .priority-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .priority-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .priority-option:hover {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .priority-option.active {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .priority-option.low {
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .priority-option.low.active {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .priority-option.medium {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .priority-option.medium.active {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .priority-option.high {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .priority-option.high.active {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(to right, var(--info), #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(to right, #34d399, #047857);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Progress Card */
+        .progress-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            height: fit-content;
+        }
+
+        .progress-circle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0%, var(--gray-light) 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);
+        }
+
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .progress-text {
+            position: absolute;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+
+        .export-actions {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Task List */
+        .tasks-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            grid-column: 1 / 2;
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .tasks-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tasks-count {
+            background: var(--primary);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .tasks-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background: var(--light);
+            border-left: 5px solid var(--gray);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .task-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-item.low {
+            border-left-color: var(--success);
+        }
+
+        .task-item.medium {
+            border-left-color: var(--warning);
+        }
+
+        .task-item.high {
+            border-left-color: var(--danger);
+        }
+
+        .task-item.completed {
+            opacity: 0.8;
+            background: #f0f9ff;
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .task-checkbox input {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--gray);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-custom i {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .task-checkbox input:checked + .checkbox-custom {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .task-checkbox input:checked + .checkbox-custom i {
+            opacity: 1;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: var(--gray);
+        }
+
+        .task-description {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-priority {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .task-date {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .task-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--gray-light);
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .task-action-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .task-action-btn.delete:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--gray-light);
+            color: var(--dark);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            background: var(--gray);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-light);
+            color: var(--gray);
+            font-size: 0.9rem;
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .input-card, .progress-card, .tasks-card {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .progress-circle {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .progress-circle::before {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .progress-percent {
+                font-size: 2.5rem;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.info {
+            background: var(--info);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Modal for JSON import/export */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(-20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .modal-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-option:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .modal-option i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 15px;
+        }
+
+        .modal-option-content h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .modal-option-content p {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* File upload area */
+        .file-upload-area {
+            border: 2px dashed var(--gray-light);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .file-upload-area h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .file-upload-area p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .selected-file {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .selected-file-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .json-preview {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--gray-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tasks"></i> Task Manager Pro</h1>
+            <p>Quản lý công việc hiệu quả với checklist, theo dõi tiến độ và nhập/xuất JSON</p>
+        </div>
+
+        <!-- Input Card -->
+        <div class="input-card">
+            <div class="card-title">
+                <i class="fas fa-plus-circle"></i>
+                <h2 id="formTitle">Thêm Công Việc Mới</h2>
+            </div>
+            
+            <div class="form-group">
+                <label for="taskTitle">Tiêu đề công việc</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-heading"></i>
+                    <input type="text" id="taskTitle" placeholder="Nhập tiêu đề công việc...">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="taskDescription">Mô tả chi tiết (tùy chọn)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-align-left"></i>
+                    <textarea id="taskDescription" placeholder="Nhập mô tả chi tiết về công việc..."></textarea>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Độ ưu tiên</label>
+                <div class="priority-options">
+                    <div class="priority-option low active" data-priority="low">
+                        <i class="fas fa-arrow-down"></i> Thấp
+                    </div>
+                    <div class="priority-option medium" data-priority="medium">
+                        <i class="fas fa-equals"></i> Trung bình
+                    </div>
+                    <div class="priority-option high" data-priority="high">
+                        <i class="fas fa-arrow-up"></i> Cao
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="saveTaskBtn">
+                    <i class="fas fa-save"></i> <span id="saveButtonText">Lưu Công Việc</span>
+                </button>
+                <button class="btn btn-secondary" id="clearFormBtn">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+            </div>
+            
+            <input type="hidden" id="taskId" value="">
+        </div>
+
+        <!-- Progress Card -->
+        <div class="progress-card">
+            <div class="card-title">
+                <i class="fas fa-chart-pie"></i>
+                <h2>Tiến Độ Công Việc</h2>
+            </div>
+            
+            <div class="progress-circle-container">
+                <div class="progress-circle" id="progressCircle">
+                    <div class="progress-text">
+                        <div class="progress-percent" id="progressPercent">0%</div>
+                        <div class="progress-label">Đã hoàn thành</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">Tổng công việc</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div class="stat-label">Đã hoàn thành</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="pendingTasks">0</div>
+                    <div class="stat-label">Đang chờ</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="highPriorityTasks">0</div>
+                    <div class="stat-label">Ưu tiên cao</div>
+                </div>
+            </div>
+            
+            <div class="export-actions">
+                <button class="btn btn-success" id="exportJsonBtn">
+                    <i class="fas fa-file-export"></i> Xuất JSON
+                </button>
+                <button class="btn btn-info" id="importJsonBtn">
+                    <i class="fas fa-file-import"></i> Nhập JSON
+                </button>
+                <button class="btn btn-secondary" id="backupBtn">
+                    <i class="fas fa-database"></i> Sao lưu dữ liệu
+                </button>
+            </div>
+        </div>
+
+        <!-- Tasks Card -->
+        <div class="tasks-card">
+            <div class="tasks-header">
+                <h2>Danh sách công việc</h2>
+                <div class="header-actions">
+                    <button class="btn btn-info" id="exportTasksJsonBtn" style="padding: 10px 20px; font-size: 0.9rem;">
+                        <i class="fas fa-file-code"></i> Xuất JSON
+                    </button>
+                    <div class="tasks-count" id="tasksCount">0 công việc</div>
+                </div>
+            </div>
+            
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">Tất cả</button>
+                <button class="filter-btn" data-filter="pending">Đang chờ</button>
+                <button class="filter-btn" data-filter="completed">Đã hoàn thành</button>
+                <button class="filter-btn" data-filter="high">Ưu tiên cao</button>
+                <button class="filter-btn" data-filter="today">Hôm nay</button>
+            </div>
+            
+            <div class="tasks-list" id="tasksList">
+                <!-- Tasks will be loaded here -->
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Chưa có công việc nào</h3>
+                    <p>Thêm công việc đầu tiên của bạn bằng form bên cạnh!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2023 Task Manager Pro | Ứng dụng quản lý công việc cá nhân | Tổng số công việc: <span id="footerTotalTasks">0</span></p>
+        </div>
+    </div>
+
+    <!-- JSON Import/Export Modal -->
+    <div class="modal-overlay" id="jsonModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-code"></i> <span id="modalTitle">Nhập/Xuất JSON</span></h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <div id="modalContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Đang xử lý...</div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const taskTitleInput = document.getElementById('taskTitle');
+        const taskDescriptionInput = document.getElementById('taskDescription');
+        const priorityOptions = document.querySelectorAll('.priority-option');
+        const saveTaskBtn = document.getElementById('saveTaskBtn');
+        const clearFormBtn = document.getElementById('clearFormBtn');
+        const tasksList = document.getElementById('tasksList');
+        const progressCircle = document.getElementById('progressCircle');
+        const progressPercent = document.getElementById('progressPercent');
+        const totalTasksElement = document.getElementById('totalTasks');
+        const completedTasksElement = document.getElementById('completedTasks');
+        const pendingTasksElement = document.getElementById('pendingTasks');
+        const highPriorityTasksElement = document.getElementById('highPriorityTasks');
+        const tasksCountElement = document.getElementById('tasksCount');
+        const footerTotalTasksElement = document.getElementById('footerTotalTasks');
+        const formTitle = document.getElementById('formTitle');
+        const saveButtonText = document.getElementById('saveButtonText');
+        const taskIdInput = document.getElementById('taskId');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const importJsonBtn = document.getElementById('importJsonBtn');
+        const backupBtn = document.getElementById('backupBtn');
+        const exportTasksJsonBtn = document.getElementById('exportTasksJsonBtn');
+        const jsonModal = document.getElementById('jsonModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalContent = document.getElementById('modalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        
+        // State
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let currentFilter = 'all';
+        let editingTaskId = null;
+        let modalMode = 'export'; // 'export' or 'import'
+        let selectedFile = null;
+        
+        // Initialize the app
+        function initApp() {
+            // Load tasks from localStorage
+            loadTasks();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Update stats and display
+            updateStats();
+            renderTasks();
+            
+            // Add sample tasks if empty
+            if (tasks.length === 0) {
+                addSampleTasks();
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Priority options
+            priorityOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    priorityOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Save task button
+            saveTaskBtn.addEventListener('click', saveTask);
+            
+            // Clear form button
+            clearFormBtn.addEventListener('click', clearForm);
+            
+            // Filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    renderTasks();
+                });
+            });
+            
+            // JSON export/import buttons
+            exportJsonBtn.addEventListener('click', () => openExportJsonModal());
+            importJsonBtn.addEventListener('click', () => openImportJsonModal());
+            backupBtn.addEventListener('click', backupData);
+            exportTasksJsonBtn.addEventListener('click', () => openExportJsonModal());
+            
+            // Modal event listeners
+            closeModalBtn.addEventListener('click', closeModal);
+            
+            // Allow Enter key to save task
+            taskTitleInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') saveTask();
+            });
+        }
+        
+        // Load tasks from localStorage
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedTasks) {
+                try {
+                    tasks = JSON.parse(savedTasks);
+                } catch (e) {
+                    console.error('Error parsing saved tasks:', e);
+                    tasks = [];
+                }
+            }
+        }
+        
+        // Save task
+        function saveTask() {
+            const title = taskTitleInput.value.trim();
+            const description = taskDescriptionInput.value.trim();
+            const priority = document.querySelector('.priority-option.active').getAttribute('data-priority');
+            
+            // Validate input
+            if (!title) {
+                showNotification('Vui lòng nhập tiêu đề công việc!', 'error');
+                taskTitleInput.focus();
+                return;
+            }
+            
+            // Create task object
+            const task = {
+                id: editingTaskId || Date.now().toString(),
+                title,
+                description,
+                priority,
+                completed: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Update or add task
+            if (editingTaskId) {
+                // Update existing task
+                const index = tasks.findIndex(t => t.id === editingTaskId);
+                if (index !== -1) {
+                    task.createdAt = tasks[index].createdAt;
+                    tasks[index] = task;
+                }
+                editingTaskId = null;
+                formTitle.textContent = 'Thêm Công Việc Mới';
+                saveButtonText.textContent = 'Lưu Công Việc';
+                showNotification('Cập nhật công việc thành công!', 'success');
+            } else {
+                // Add new task
+                tasks.push(task);
+                showNotification('Thêm công việc thành công!', 'success');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Update UI
+            clearForm();
+            updateStats();
+            renderTasks();
+        }
+        
+        // Clear form
+        function clearForm() {
+            taskTitleInput.value = '';
+            taskDescriptionInput.value = '';
+            priorityOptions.forEach(opt => opt.classList.remove('active'));
+            document.querySelector('.priority-option.low').classList.add('active');
+            taskIdInput.value = '';
+            editingTaskId = null;
+            formTitle.textContent = 'Thêm Công Việc Mới';
+            saveButtonText.textContent = 'Lưu Công Việc';
+            taskTitleInput.focus();
+        }
+        
+        // Edit task
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            // Fill form with task data
+            taskTitleInput.value = task.title;
+            taskDescriptionInput.value = task.description || '';
+            
+            // Set priority
+            priorityOptions.forEach(opt => opt.classList.remove('active'));
+            document.querySelector(`.priority-option.${task.priority}`).classList.add('active');
+            
+            // Set editing mode
+            editingTaskId = id;
+            formTitle.textContent = 'Chỉnh Sửa Công Việc';
+            saveButtonText.textContent = 'Cập Nhật';
+            
+            // Scroll to form
+            document.querySelector('.input-card').scrollIntoView({ behavior: 'smooth' });
+            taskTitleInput.focus();
+        }
+        
+        // Delete task
+        function deleteTask(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) return;
+            
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // If we were editing this task, clear the form
+            if (editingTaskId === id) {
+                clearForm();
+            }
+            
+            updateStats();
+            renderTasks();
+            showNotification('Đã xóa công việc!', 'success');
+        }
+        
+        // Toggle task completion
+        function toggleTaskCompletion(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            task.completed = !task.completed;
+            task.updatedAt = new Date().toISOString();
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            updateStats();
+            renderTasks();
+            
+            // Show notification
+            if (task.completed) {
+                showNotification('Chúc mừng! Bạn đã hoàn thành một công việc!', 'success');
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const pending = total - completed;
+            const highPriority = tasks.filter(t => t.priority === 'high').length;
+            
+            // Update elements
+            totalTasksElement.textContent = total;
+            completedTasksElement.textContent = completed;
+            pendingTasksElement.textContent = pending;
+            highPriorityTasksElement.textContent = highPriority;
+            tasksCountElement.textContent = `${total} công việc`;
+            footerTotalTasksElement.textContent = total;
+            
+            // Update progress circle
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            progressPercent.textContent = `${percent}%`;
+            
+            // Update progress circle gradient
+            progressCircle.style.background = `conic-gradient(var(--primary) ${percent}%, var(--gray-light) ${percent}%)`;
+        }
+        
+        // Render tasks
+        function renderTasks() {
+            // Filter tasks based on current filter
+            let filteredTasks = [...tasks];
+            
+            if (currentFilter === 'pending') {
+                filteredTasks = tasks.filter(t => !t.completed);
+            } else if (currentFilter === 'completed') {
+                filteredTasks = tasks.filter(t => t.completed);
+            } else if (currentFilter === 'high') {
+                filteredTasks = tasks.filter(t => t.priority === 'high');
+            } else if (currentFilter === 'today') {
+                const today = new Date().toDateString();
+                filteredTasks = tasks.filter(t => {
+                    const taskDate = new Date(t.updatedAt).toDateString();
+                    return taskDate === today;
+                });
+            }
+            
+            // If no tasks, show empty state
+            if (filteredTasks.length === 0) {
+                let message = '';
+                if (currentFilter === 'all') message = 'Thêm công việc đầu tiên của bạn bằng form bên cạnh!';
+                else if (currentFilter === 'pending') message = 'Không có công việc nào đang chờ!';
+                else if (currentFilter === 'completed') message = 'Chưa có công việc nào được hoàn thành!';
+                else if (currentFilter === 'high') message = 'Không có công việc ưu tiên cao!';
+                else if (currentFilter === 'today') message = 'Không có công việc nào được cập nhật hôm nay!';
+                
+                tasksList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>${currentFilter === 'all' ? 'Chưa có công việc nào' : 'Không tìm thấy công việc'}</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort tasks: high priority first, then pending, then completed
+            filteredTasks.sort((a, b) => {
+                // First sort by completion status (pending first)
+                if (a.completed !== b.completed) {
+                    return a.completed ? 1 : -1;
+                }
+                
+                // Then sort by priority (high first)
+                const priorityOrder = { high: 3, medium: 2, low: 1 };
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                }
+                
+                // Then sort by creation date (newest first)
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            // Render tasks
+            tasksList.innerHTML = filteredTasks.map(task => `
+                <div class="task-item ${task.priority} ${task.completed ? 'completed' : ''}">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task-${task.id}" ${task.completed ? 'checked' : ''}>
+                        <label for="task-${task.id}" class="checkbox-custom" onclick="toggleTaskCompletion('${task.id}')">
+                            <i class="fas fa-check"></i>
+                        </label>
+                    </div>
+                    
+                    <div class="task-content">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                        
+                        <div class="task-footer">
+                            <div class="task-priority priority-${task.priority}">
+                                ${task.priority === 'high' ? '<i class="fas fa-arrow-up"></i> Ưu tiên cao' : 
+                                  task.priority === 'medium' ? '<i class="fas fa-equals"></i> Ưu tiên trung bình' : 
+                                  '<i class="fas fa-arrow-down"></i> Ưu tiên thấp'}
+                            </div>
+                            <div class="task-date">
+                                ${formatDate(task.updatedAt)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <button class="task-action-btn" onclick="editTask('${task.id}')" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-action-btn delete" onclick="deleteTask('${task.id}')" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Open export JSON modal
+        function openExportJsonModal() {
+            modalMode = 'export';
+            modalTitle.textContent = 'Xuất Dữ Liệu JSON';
+            
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            modalContent.innerHTML = `
+                <p>Xuất toàn bộ dữ liệu công việc của bạn sang file JSON để sao lưu hoặc chia sẻ.</p>
+                
+                <div class="stats-container" style="margin: 20px 0;">
+                    <div class="stat-box">
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">Tổng công việc</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${completed}</div>
+                        <div class="stat-label">Đã hoàn thành</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${total - completed}</div>
+                        <div class="stat-label">Đang chờ</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${percent}%</div>
+                        <div class="stat-label">Tiến độ</div>
+                    </div>
+                </div>
+                
+                <div class="json-preview">
+                    ${JSON.stringify(tasks, null, 2)}
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelBtn">Hủy</button>
+                    <button class="btn btn-success" id="exportBtn">
+                        <i class="fas fa-download"></i> Tải file JSON
+                    </button>
+                    <button class="btn btn-info" id="copyBtn">
+                        <i class="fas fa-copy"></i> Sao chép JSON
+                    </button>
+                </div>
+            `;
+            
+            openModal();
+            
+            // Add event listeners for modal buttons
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('exportBtn').addEventListener('click', exportJsonFile);
+            document.getElementById('copyBtn').addEventListener('click', copyJsonToClipboard);
+        }
+        
+        // Open import JSON modal
+        function openImportJsonModal() {
+            modalMode = 'import';
+            modalTitle.textContent = 'Nhập Dữ Liệu JSON';
+            selectedFile = null;
+            
+            modalContent.innerHTML = `
+                <p>Nhập dữ liệu công việc từ file JSON. Dữ liệu hiện tại sẽ được thay thế hoặc hợp nhất.</p>
+                
+                <div class="file-upload-area" id="fileUploadArea">
+                    <i class="fas fa-file-upload"></i>
+                    <h4>Kéo thả file JSON vào đây</h4>
+                    <p>hoặc nhấn để chọn file</p>
+                    <input type="file" id="jsonFileInput" class="file-input" accept=".json,application/json">
+                </div>
+                
+                <div id="selectedFileContainer" style="display: none;">
+                    <div class="selected-file">
+                        <div>
+                            <div class="selected-file-name" id="selectedFileName"></div>
+                            <div id="fileSize" style="font-size: 0.8rem; color: var(--gray);"></div>
+                        </div>
+                        <button class="remove-file" id="removeFileBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="json-preview" id="jsonPreview" style="display: none;">
+                    <!-- JSON preview will be shown here -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label>
+                        <input type="radio" name="importMode" value="replace" checked> Thay thế toàn bộ dữ liệu hiện tại
+                    </label>
+                    <br>
+                    <label>
+                        <input type="radio" name="importMode" value="merge"> Hợp nhất với dữ liệu hiện tại
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelBtn">Hủy</button>
+                    <button class="btn btn-success" id="importBtn" disabled>
+                        <i class="fas fa-upload"></i> Nhập dữ liệu
+                    </button>
+                </div>
+            `;
+            
+            openModal();
+            
+            // Add event listeners for modal elements
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const jsonFileInput = document.getElementById('jsonFileInput');
+            const importBtn = document.getElementById('importBtn');
+            
+            fileUploadArea.addEventListener('click', () => jsonFileInput.click());
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = 'var(--primary)';
+                fileUploadArea.style.background = 'rgba(79, 70, 229, 0.05)';
+            });
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.style.borderColor = 'var(--gray-light)';
+                fileUploadArea.style.background = 'transparent';
+            });
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = 'var(--gray-light)';
+                fileUploadArea.style.background = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+            
+            jsonFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+            
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            importBtn.addEventListener('click', importJsonData);
+            
+            if (document.getElementById('removeFileBtn')) {
+                document.getElementById('removeFileBtn').addEventListener('click', removeSelectedFile);
+            }
+        }
+        
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                showNotification('Vui lòng chọn file JSON!', 'error');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Show selected file info
+            document.getElementById('selectedFileContainer').style.display = 'block';
+            document.getElementById('selectedFileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = `Kích thước: ${formatFileSize(file.size)}`;
+            
+            // Enable import button
+            document.getElementById('importBtn').disabled = false;
+            
+            // Read and preview file content
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonContent = e.target.result;
+                    const jsonData = JSON.parse(jsonContent);
+                    
+                    // Validate JSON structure
+                    if (!Array.isArray(jsonData)) {
+                        throw new Error('Dữ liệu JSON phải là một mảng');
+                    }
+                    
+                    // Show JSON preview
+                    const jsonPreview = document.getElementById('jsonPreview');
+                    jsonPreview.style.display = 'block';
+                    jsonPreview.textContent = JSON.stringify(jsonData, null, 2);
+                    
+                    // Validate each task
+                    let validTasks = 0;
+                    jsonData.forEach(task => {
+                        if (task.title && task.id && task.priority) {
+                            validTasks++;
+                        }
+                    });
+                    
+                    if (validTasks === 0) {
+                        showNotification('File JSON không chứa dữ liệu công việc hợp lệ!', 'error');
+                        document.getElementById('importBtn').disabled = true;
+                    } else {
+                        showNotification(`Tìm thấy ${validTasks} công việc trong file`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    showNotification('File JSON không hợp lệ!', 'error');
+                    document.getElementById('importBtn').disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Remove selected file
+        function removeSelectedFile() {
+            selectedFile = null;
+            document.getElementById('selectedFileContainer').style.display = 'none';
+            document.getElementById('jsonPreview').style.display = 'none';
+            document.getElementById('importBtn').disabled = true;
+            document.getElementById('jsonFileInput').value = '';
+        }
+        
+        // Export JSON file
+        function exportJsonFile() {
+            showLoading('Đang xuất file...');
+            
+            setTimeout(() => {
+                try {
+                    const dataStr = JSON.stringify(tasks, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `task-manager-backup-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    URL.revokeObjectURL(url);
+                    
+                    hideLoading();
+                    showNotification('Xuất file JSON thành công!', 'success');
+                    closeModal();
+                } catch (error) {
+                    console.error('Error exporting JSON:', error);
+                    hideLoading();
+                    showNotification('Có lỗi xảy ra khi xuất file!', 'error');
+                }
+            }, 500);
+        }
+        
+        // Copy JSON to clipboard
+        function copyJsonToClipboard() {
+            try {
+                const jsonString = JSON.stringify(tasks, null, 2);
+                navigator.clipboard.writeText(jsonString).then(() => {
+                    showNotification('Đã sao chép JSON vào clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Error copying to clipboard:', err);
+                    showNotification('Không thể sao chép vào clipboard!', 'error');
+                });
+            } catch (error) {
+                console.error('Error copying JSON:', error);
+                showNotification('Có lỗi xảy ra khi sao chép!', 'error');
+            }
+        }
+        
+        // Import JSON data
+        function importJsonData() {
+            if (!selectedFile) {
+                showNotification('Vui lòng chọn file JSON!', 'error');
+                return;
+            }
+            
+            showLoading('Đang nhập dữ liệu...');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(jsonData)) {
+                        throw new Error('Dữ liệu JSON phải là một mảng');
+                    }
+                    
+                    // Validate tasks
+                    const validTasks = jsonData.filter(task => 
+                        task && 
+                        typeof task === 'object' && 
+                        task.id && 
+                        task.title && 
+                        task.priority
+                    );
+                    
+                    if (validTasks.length === 0) {
+                        throw new Error('Không có dữ liệu công việc hợp lệ');
+                    }
+                    
+                    // Get import mode
+                    const importMode = document.querySelector('input[name="importMode"]:checked').value;
+                    
+                    if (importMode === 'replace') {
+                        // Replace all tasks
+                        tasks = validTasks;
+                        showNotification(`Đã nhập ${validTasks.length} công việc (thay thế toàn bộ)`, 'success');
+                    } else {
+                        // Merge with existing tasks
+                        const existingIds = new Set(tasks.map(t => t.id));
+                        const newTasks = validTasks.filter(task => !existingIds.has(task.id));
+                        
+                        tasks = [...tasks, ...newTasks];
+                        showNotification(`Đã nhập ${newTasks.length} công việc mới (hợp nhất)`, 'success');
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    
+                    // Update UI
+                    updateStats();
+                    renderTasks();
+                    
+                    hideLoading();
+                    closeModal();
+                } catch (error) {
+                    console.error('Error importing JSON:', error);
+                    hideLoading();
+                    showNotification('Dữ liệu JSON không hợp lệ!', 'error');
+                }
+            };
+            
+            reader.readAsText(selectedFile);
+        }
+        
+        // Backup data (export with timestamp)
+        function backupData() {
+            showLoading('Đang tạo bản sao lưu...');
+            
+            setTimeout(() => {
+                try {
+                    const backupData = {
+                        version: '1.0',
+                        exportDate: new Date().toISOString(),
+                        totalTasks: tasks.length,
+                        completedTasks: tasks.filter(t => t.completed).length,
+                        tasks: tasks
+                    };
+                    
+                    const dataStr = JSON.stringify(backupData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `task-manager-backup-${timestamp}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    URL.revokeObjectURL(url);
+                    
+                    hideLoading();
+                    showNotification('Sao lưu dữ liệu thành công!', 'success');
+                } catch (error) {
+                    console.error('Error creating backup:', error);
+                    hideLoading();
+                    showNotification('Có lỗi xảy ra khi sao lưu!', 'error');
+                }
+            }, 500);
+        }
+        
+        // Open modal
+        function openModal() {
+            jsonModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Close modal
+        function closeModal() {
+            jsonModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Show loading overlay
+        function showLoading(text = 'Đang xử lý...') {
+            loadingText.textContent = text;
+            loadingOverlay.classList.add('active');
+        }
+        
+        // Hide loading overlay
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+        
+        // Add sample tasks for first-time users
+        function addSampleTasks() {
+            const sampleTasks = [
+                {
+                    id: '1',
+                    title: 'Hoàn thành báo cáo tuần',
+                    description: 'Viết báo cáo công việc tuần này và gửi cho quản lý',
+                    priority: 'high',
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    title: 'Mua sắm tạp hóa',
+                    description: 'Mua rau, thịt, trứng và sữa',
+                    priority: 'medium',
+                    completed: true,
+                    createdAt: new Date(Date.now() - 86400000).toISOString(),
+                    updatedAt: new Date(Date.now() - 43200000).toISOString()
+                },
+                {
+                    id: '3',
+                    title: 'Tập thể dục 30 phút',
+                    description: 'Chạy bộ hoặc tập yoga',
+                    priority: 'low',
+                    completed: false,
+                    createdAt: new Date(Date.now() - 172800000).toISOString(),
+                    updatedAt: new Date(Date.now() - 172800000).toISOString()
+                }
+            ];
+            
+            tasks = sampleTasks;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateStats();
+            renderTasks();
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) {
+                return 'Vừa xong';
+            } else if (diffMins < 60) {
+                return `${diffMins} phút trước`;
+            } else if (diffHours < 24) {
+                return `${diffHours} giờ trước`;
+            } else if (diffDays < 7) {
+                return `${diffDays} ngày trước`;
+            } else {
+                return date.toLocaleDateString('vi-VN');
+            }
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
